@@ -15,6 +15,8 @@ from Laser import Laser
 from Bullet import Bullet
 import cannon_constants as CONST
 from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
+from kivy.uix.label import Label
+from kivy.properties import StringProperty
 
 SCREEN_WIDTH: int = CONST.SCREEN_WIDTH
 SCREEN_HEIGHT: int = CONST.SCREEN_HEIGHT
@@ -30,10 +32,9 @@ class AimWidget(Widget):
     def on_touch_down(self, touch):
         print(f"Touch on aim_widget")
 class Game(Widget):
+    score = 0
     ball = ObjectProperty(None)
     ball_released = False
-    start = False
-    after = False
     obstacles_added = False
     obstacle = ObjectProperty(None)
     obstacles = ListProperty([])
@@ -49,9 +50,25 @@ class Game(Widget):
             pos_hint={'center_x': 0.2, 'center_y': 0.2},
             size_hint=(0.2, 0.1)
         )
+        self.score_label = Label(
+            text = "Current score: " + str(self.score),
+            pos_hint={'center_x': 0.3, 'center_y': 0.3},
+            size_hint=(0.2, 0.1)
+        )
+        self.add_widget(self.score_label)
         self.add_widget(self.back_btn)
+        self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 10, n_of_obstacles_y = 30)
+        self.score = 0
+        self.score_label.text = "Current score: " + str(self.score)
     def back_btn_callback(self, *args, **kwargs):
+        for obstacle in self.obstacles:
+            self.remove_widget(obstacle)
+            self.obstacles.remove(obstacle)
+        self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 10, n_of_obstacles_y = 30)
+        self.score = 0
+        self.score_label.text = "Current score: " + str(self.score)
         self.manager.current = 'menu'
+        
     def change_weapon(self, weapon):
         self.chosen_weapon = weapon
         print(f"chosen weapon is {self.chosen_weapon}")
@@ -75,12 +92,12 @@ class Game(Widget):
             if Obstacle.laserCollision(obs, self.laser):
                 self.remove_obstacle(obs)
 
-    def startGame(self):
-        self.start = True
-
     def remove_obstacle(self, obstacle):
         self.remove_widget(obstacle)
         self.obstacles.remove(obstacle)
+        self.score += 1
+        self.score_label.text = "Current score: " + str(self.score)
+        print(self.score)
 
     def serve_ball(self, ang, coef):
         if self.chosen_weapon == "bullet":
@@ -133,21 +150,7 @@ class Game(Widget):
             else:
                 self.remove_widget(self.laser)
                 self.laserFired = False
-
-        if self.start:
-            print("game started")
-            but = self.ids["start_button"]
-            self.remove_widget(but)
-            self.start = False
-            self.after = True
-
-    # def on_touch_down(self, touch):
-    #     if self.after:
-    #         self.spawn_ball()
-    #     else:
-    #         Clock.schedule_once(lambda dt: self.on_touch_down(touch))
-    #         return super(Game, self).on_touch_down(touch)
-
+                
     def on_touch_up(self, touch):
         if (touch.x < self.width / 3) and (touch.y < self.height / 3):
             angle = atan((self.height / 3 - touch.y) / (self.width / 3 - touch.x))
