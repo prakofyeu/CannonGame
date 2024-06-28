@@ -1,0 +1,36 @@
+from kivy import Config
+from kivy.app import App
+from kivy.clock import Clock
+from kivy.uix.button import Button
+from kivy.uix.screenmanager import ScreenManager, Screen
+
+class Menu(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.start_game_btn = Button(
+            text="Start Game",
+            on_press=self.start_game_btn_callback,
+            pos_hint={'center_x': 0.5, 'center_y': 0.5},
+            size_hint=(0.2, 0.1)
+        )
+        self.help_btn = Button(
+            text = "Help",
+            on_press = self.help_callback,
+            pos_hint={'center.x': 0.7, 'center_y': 0.7},
+            size_hint=(0.2, 0.1)
+        )
+        self.hall_of_fame_btn = Button(
+            text = "HoHall Of Fame",
+            on_press = self.hall_of_fame_callback,
+            pos_hint={'center.x': 0.3, 'center_y': 0.3},
+            size_hint=(0.2, 0.1)
+        )
+        self.add_widget(self.start_game_btn)
+        self.add_widget(self.help_btn)
+        self.add_widget(self.hall_of_fame_btn)
+    def start_game_btn_callback(self, *args, **kwargs):
+        self.manager.current = 'game'
+    def help_callback(self, *args, **kwargs):
+        self.manager.current = 'help'
+    def hall_of_fame_callback(self, *args, **kwargs):
+        self.manager.current = 'hall_of_fame'
