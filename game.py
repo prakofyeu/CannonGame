@@ -45,15 +45,15 @@ class Game(Widget):
         super(Game, self).__init__(**kwargs)
         self.manager = manager
         self.back_btn = Button(
-            text="Exit to menu",
+            text="Exit game",
             on_press=self.back_btn_callback,
             pos_hint={'center_x': 0.2, 'center_y': 0.2},
             size_hint=(0.2, 0.1)
         )
         self.score_label = Label(
             text = "Current score: " + str(self.score),
-            pos_hint={'center_x': 0.3, 'center_y': 0.3},
-            size_hint=(0.2, 0.1)
+            center_x = 100,
+            center_y = SCREEN_HEIGHT - 60
         )
         self.add_widget(self.score_label)
         self.add_widget(self.back_btn)
@@ -61,14 +61,27 @@ class Game(Widget):
         self.score = 0
         self.score_label.text = "Current score: " + str(self.score)
     def back_btn_callback(self, *args, **kwargs):
-        for obstacle in self.obstacles:
-            self.remove_widget(obstacle)
-            self.obstacles.remove(obstacle)
+        while len(self.obstacles) != 0:
+            for obstacle in self.obstacles:
+                if obstacle:
+                    self.remove_widget(obstacle)
+                    self.obstacles.remove(obstacle)
         self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 10, n_of_obstacles_y = 30)
+        self.set_best_score(self.score)
         self.score = 0
         self.score_label.text = "Current score: " + str(self.score)
         self.manager.current = 'menu'
-        
+    
+    def set_best_score(self, score):
+        file = open("best_score.txt", "r")
+        best_score = int(file.read())
+        file.close()
+        if score > best_score:
+            best_score = score
+            file = open("best_score.txt", "w")
+            file.write(str(score))
+            file.close()
+            
     def change_weapon(self, weapon):
         self.chosen_weapon = weapon
         print(f"chosen weapon is {self.chosen_weapon}")

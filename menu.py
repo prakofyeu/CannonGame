@@ -16,7 +16,7 @@ class Menu(Screen):
         self.help_btn = Button(
             text = "Help",
             on_press = self.help_callback,
-            pos_hint={'center.x': 0.7, 'center_y': 0.7},
+            pos_hint={'center.x': 0.1, 'center_y': 0.1},
             size_hint=(0.2, 0.1)
         )
         self.hall_of_fame_btn = Button(

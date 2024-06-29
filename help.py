@@ -6,17 +6,22 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.label import Label
 
 class Help(Screen):
+    helpText = """
+    Click on the screen to launch a projectile
+    You can switch types of projectiles by clicking the buttons in the upper left corner
+    In the hall of fame you can see the best scores
+    """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.label = Label(
-            text="Меня ебало три собаки",
-            pos_hint={'center_x': 0.3, 'center_y': 0.3},
+            text=self.helpText,
+            pos_hint={'center_x': 0.5, 'center_y': 0.5},
             size_hint=(0.2, 0.1)
         )
         self.back_btn = Button(
             text="Back to menu",
             on_press=self.back_btn_callback,
-            pos_hint={'center_x': 0.5, 'center_y': 0.5},
+            pos_hint={'center_x': 0.1, 'center_y': 0.1},
             size_hint=(0.2, 0.1)
         )
         self.add_widget(self.label)
