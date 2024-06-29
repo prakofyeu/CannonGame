@@ -56,7 +56,14 @@ class Game(Widget):
             center_x = 100,
             center_y = SCREEN_HEIGHT - 60
         )
+        self.game_over_label = Label(
+            text = "",
+            center_x = SCREEN_WIDTH/2 - 100,
+            center_y = SCREEN_HEIGHT/2
+        )
+        self.shots = 5
         self.add_widget(self.score_label)
+        self.add_widget(self.game_over_label)
         self.add_widget(self.back_btn)
         self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 10, n_of_obstacles_y = 30)
         self.score = 0
@@ -71,6 +78,8 @@ class Game(Widget):
         self.set_best_score(self.score)
         self.score = 0
         self.score_label.text = "Current score: " + str(self.score)
+        self.game_over_label.text = ""
+        self.shots = 5
         self.manager.current = 'menu'
     
     def set_best_score(self, score):
@@ -107,7 +116,8 @@ class Game(Widget):
         print(self.score)
 
     def serve_ball(self, ang, coef):
-        if self.chosen_weapon == "bullet":
+        if self.chosen_weapon == "bullet" and self.shots > 0:
+            self.shots -= 1
             self.ball_released = True
             self.ball.pos = SCREEN_WIDTH / 3, SCREEN_HEIGHT / 3
             self.ball.velocity = (Initial_velocity * cos(ang) * coef, Initial_velocity * sin(ang) * coef)
@@ -148,6 +158,8 @@ class Game(Widget):
         self.obstacles_added = True
 
     def update(self, dt):
+        if self.shots == 0:
+            self.game_over_label.text = "You are out of shots, game over. You score:  " + str(self.score) + "\n" + "Visit hall of fame to see the best result"
         for obstacle in self.obstacles:
             if obstacle.obstacle_collision(self.ball) and obstacle.type == "rock":
                 self.bullet_blast(obstacle)
@@ -155,7 +167,6 @@ class Game(Widget):
             if obstacle.obstacle_collision(self.ball) and (obstacle.type == "perpetio" or obstacle.type == "mirror"):
                 self.ball.velocity[0] = -self.ball.velocity[0]
                 self.ball.velocity[1] = -self.ball.velocity[1]
-                 #self.spawn_ball()
             if self.laserFired:
                 if obstacle.laserCollision(self.laser):
                     self.laserBlast()
