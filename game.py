@@ -17,6 +17,7 @@ import cannon_constants as CONST
 from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
 from kivy.uix.label import Label
 from kivy.properties import StringProperty
+import random
 
 SCREEN_WIDTH: int = CONST.SCREEN_WIDTH
 SCREEN_HEIGHT: int = CONST.SCREEN_HEIGHT
@@ -88,17 +89,10 @@ class Game(Widget):
 
     def bullet_blast(self, target_block):
         pos = target_block.pos
-        # print(len(self.obstacles))
         for obs in self.obstacles[:]:
             distance = sqrt((pos[0] - obs.pos[0])**2 + (pos[1] - obs.pos[1])**2)
-            # print(obs.id)
-            # print(distance)
-            # print(CONST.BULLET_RADIUS)
-            if distance <= CONST.BULLET_RADIUS:
-                # print("deleted")
+            if distance <= CONST.BULLET_RADIUS and obs.type == "rock":
                 self.remove_obstacle(obs)
-            # print()
-        # print(len(self.obstacles))
 
     def laserBlast(self):
         for obs in self.obstacles[:]:
@@ -134,21 +128,34 @@ class Game(Widget):
         self.ball.velocity = (0, 0)
         self.ball_released = False
 
-    def addObstacles(self, pos, object_id, n_of_obstacles_x, n_of_obstacles_y):
-        print("obstacles added")
-        for i in range(n_of_obstacles_x):
-            for j in range(n_of_obstacles_y):
-                obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"))
+    def addObstacles(self, pos, object_id, n_of_obstacles_x, n_of_obstacles_y, difficulty = "easy"):
+        if difficulty == "easy":
+            t = 0
+            for i in range(n_of_obstacles_x):
+             for j in range(n_of_obstacles_y):
+                if j%3 == 0:
+                    t = random.randint(1,3)
+                    if t == 1:
+                        obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="perpetio")
+                    elif t == 2:
+                        obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="mirror")
+                    else:
+                        obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="rock")
+                else:
+                    obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"))
                 self.add_widget(obstacle)
                 self.obstacles.append(obstacle)
         self.obstacles_added = True
 
     def update(self, dt):
         for obstacle in self.obstacles:
-            if obstacle.obstacle_collision(self.ball):
+            if obstacle.obstacle_collision(self.ball) and obstacle.type == "rock":
                 self.bullet_blast(obstacle)
                 self.spawn_ball()
-                # self.remove_obstacle(obstacle)
+            if obstacle.obstacle_collision(self.ball) and (obstacle.type == "perpetio" or obstacle.type == "mirror"):
+                self.ball.velocity[0] = -self.ball.velocity[0]
+                self.ball.velocity[1] = -self.ball.velocity[1]
+                 #self.spawn_ball()
             if self.laserFired:
                 if obstacle.laserCollision(self.laser):
                     self.laserBlast()
