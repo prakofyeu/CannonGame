@@ -302,6 +302,7 @@ class Game(Widget):
         if self.laser.firingLaser:
             self.laser.draw_laser_segment(self.laser.angleLaser)
             with self.canvas:
+                Color(0, 1, 0, 1)
                 self.laser.segment = Line(points=[[self.laser.initial_point_x, self.laser.initial_point_y], [self.laser.x, self.laser.y]], width=5)
                 self.laser.laser_segments.append(self.laser.segment)
             self.deleteLaser()

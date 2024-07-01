@@ -4,24 +4,38 @@
 <Bullet>:
     size: 10, 10
     canvas:
+        Color:
+            rgba: 1, 1, 1, 1
         Ellipse:
             pos: self.pos
             size: self.size
+            source: 'bullet.png'
+            angle_start: 0
+            angle_end: 360
 
 <Bomb>:
     size: 20, 20
     canvas:
+        Color:
+            rgba: 1, 1, 1, 1
         Ellipse:
             pos: self.pos
             size: self.size
+            source: 'bomb.png'
+            angle_start: 0
+            angle_end: 360
 
 
 <Obstacle>:
     #size: 100, 200
     canvas:
+        Color:
+            rgba: 1, 1, 1, 1
         Rectangle:
             pos: self.pos
             size: self.size
+
+
 
 <Laser>:
     size: 20, 2000
@@ -42,7 +56,7 @@
 
     Bullet:
         id: pong_ball
-    
+
     Bomb:
         id: bomb
 

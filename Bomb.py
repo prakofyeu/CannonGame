@@ -3,7 +3,8 @@ from kivy.vector import Vector
 from kivy.properties import (
     NumericProperty, ReferenceListProperty
 )
-from kivy.graphics import Ellipse
+from kivy.graphics import Ellipse, Color
+from kivy.core.image import Image as CoreImage
 from cannon_constants import BOMB_MASS, BOMB_DRILL, BOMB_MAX_VEL
 
 Frame_rate = 20.0
@@ -22,7 +23,6 @@ class Bomb(Widget):
 
         with self.canvas:
             self.rect = Ellipse(pos=(self.x, self.y), size=(20, 20), source='bomb.png')
-
     def move(self):
         self.velocity = self.velocity_x, self.velocity_y - (Free_fall_acceleration / Frame_rate)
         self.pos = Vector(*self.velocity) + self.pos
