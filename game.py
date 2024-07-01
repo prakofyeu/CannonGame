@@ -108,7 +108,7 @@ class Game(Widget):
     def start_medium_btn_callback(self, *args, **kwargs):
         self.clear_field()
         self.shots = 5
-        self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 10, n_of_obstacles_y = 30, difficulty="medium")
+        self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 20, n_of_obstacles_y = 40, difficulty="medium")
         self.score = 0
         self.score_label.text = "Current score: " + str(self.score)
         self.game_over_label.text = ""
@@ -116,7 +116,7 @@ class Game(Widget):
     def start_hard_btn_callback(self, *args, **kwargs):
         self.clear_field()
         self.shots = 5
-        self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 10, n_of_obstacles_y = 30, difficulty="hard")
+        self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 30, n_of_obstacles_y = 40, difficulty="hard")
         self.score = 0
         self.score_label.text = "Current score: " + str(self.score)
         self.game_over_label.text = ""
