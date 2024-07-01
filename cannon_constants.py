@@ -21,12 +21,12 @@ LASER_VEL = SCREEN_WIDTH/1.5
 
 # Bullet and Bombshell projectiles parameter that affects the (spherical) range of the damage.
 BULLET_RADIUS = SCREEN_WIDTH/10
-BOMB_RADIUS = SCREEN_WIDTH/50
+BOMB_RADIUS = SCREEN_WIDTH/10
 
 # Laser projectiles parameter that affects the (cylindrical) range of the damage.
 LASER_DIST = SCREEN_WIDTH/100
 
 # Parameter of the Bombshell and Laser projectiles that represents the space travelled inside the obstacles.
-BOMB_DRILL = SCREEN_WIDTH/50
+BOMB_DRILL = SCREEN_WIDTH/100
 LASER_IMPULSE = SCREEN_WIDTH/30
 
