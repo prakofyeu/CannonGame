@@ -8,7 +8,7 @@ class Menu(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.start_game_btn = Button(
-            text="Start Game",
+            text="Play",
             on_press=self.start_game_btn_callback,
             pos_hint={'center_x': 0.5, 'center_y': 0.5},
             size_hint=(0.2, 0.1)

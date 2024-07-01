@@ -34,6 +34,7 @@ class AimWidget(Widget):
         print(f"Touch on aim_widget")
 class Game(Widget):
     score = 0
+    shots = 0
     ball = ObjectProperty(None)
     ball_released = False
     obstacles_added = False
@@ -61,25 +62,68 @@ class Game(Widget):
             center_x = SCREEN_WIDTH/2 - 100,
             center_y = SCREEN_HEIGHT/2
         )
+        self.start_easy_btn = Button(
+            text="Easy level",
+            on_press=self.start_easy_btn_callback,
+            center_x = 100,
+            center_y = SCREEN_HEIGHT - 200,
+            size_hint=(0.2, 0.1)
+        )
+        self.start_medium_btn = Button(
+            text="Medium level",
+            on_press=self.start_medium_btn_callback,
+            center_x = 100,
+            center_y = SCREEN_HEIGHT - 300,
+            size_hint=(0.2, 0.1)
+        )
+        self.start_hard_btn = Button(
+            text="Hard level",
+            on_press=self.start_hard_btn_callback,
+            center_x = 100,
+            center_y = SCREEN_HEIGHT - 400,
+            size_hint=(0.2, 0.1)
+        )
         self.shots = 5
         self.add_widget(self.score_label)
         self.add_widget(self.game_over_label)
         self.add_widget(self.back_btn)
-        self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 10, n_of_obstacles_y = 30)
-        self.score = 0
-        self.score_label.text = "Current score: " + str(self.score)
-    def back_btn_callback(self, *args, **kwargs):
+        self.add_widget(self.start_easy_btn)
+        self.add_widget(self.start_medium_btn)
+        self.add_widget(self.start_hard_btn)
+    def clear_field(self):
         while len(self.obstacles) != 0:
             for obstacle in self.obstacles:
                 if obstacle:
                     self.remove_widget(obstacle)
                     self.obstacles.remove(obstacle)
-        self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 10, n_of_obstacles_y = 30)
-        self.set_best_score(self.score)
+    
+    def start_easy_btn_callback(self, *args, **kwargs):
+        self.clear_field()
+        self.shots = 10
+        self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 10, n_of_obstacles_y = 30, difficulty="easy")
         self.score = 0
         self.score_label.text = "Current score: " + str(self.score)
         self.game_over_label.text = ""
+        
+    def start_medium_btn_callback(self, *args, **kwargs):
+        self.clear_field()
         self.shots = 5
+        self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 10, n_of_obstacles_y = 30, difficulty="medium")
+        self.score = 0
+        self.score_label.text = "Current score: " + str(self.score)
+        self.game_over_label.text = ""
+        
+    def start_hard_btn_callback(self, *args, **kwargs):
+        self.clear_field()
+        self.shots = 5
+        self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 10, n_of_obstacles_y = 30, difficulty="hard")
+        self.score = 0
+        self.score_label.text = "Current score: " + str(self.score)
+        self.game_over_label.text = ""
+    
+    def back_btn_callback(self, *args, **kwargs):
+        self.clear_field()
+        self.set_best_score(self.score)
         self.manager.current = 'menu'
     
     def set_best_score(self, score):
@@ -144,6 +188,36 @@ class Game(Widget):
             for i in range(n_of_obstacles_x):
              for j in range(n_of_obstacles_y):
                 if j%3 == 0:
+                    t = random.randint(1,2)
+                    if t == 1:
+                        obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="perpetio")
+                    else:
+                        obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="rock")
+                else:
+                    obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"))
+                self.add_widget(obstacle)
+                self.obstacles.append(obstacle)
+        elif difficulty == "medium":
+            t = 0
+            for i in range(n_of_obstacles_x):
+             for j in range(n_of_obstacles_y):
+                if j%3 == 0:
+                    t = random.randint(1,3)
+                    if t == 1:
+                        obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="perpetio")
+                    elif t == 2:
+                        obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="mirror")
+                    else:
+                        obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="rock")
+                else:
+                    obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"))
+                self.add_widget(obstacle)
+                self.obstacles.append(obstacle)
+        elif difficulty == "hard":
+            t = 0
+            for i in range(n_of_obstacles_x):
+             for j in range(n_of_obstacles_y):
+                if j%1 == 0:
                     t = random.randint(1,3)
                     if t == 1:
                         obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="perpetio")
@@ -158,8 +232,6 @@ class Game(Widget):
         self.obstacles_added = True
 
     def update(self, dt):
-        if self.shots == 0:
-            self.game_over_label.text = "You are out of shots, game over. You score:  " + str(self.score) + "\n" + "Visit hall of fame to see the best result"
         for obstacle in self.obstacles:
             if obstacle.obstacle_collision(self.ball) and obstacle.type == "rock":
                 self.bullet_blast(obstacle)
@@ -181,6 +253,8 @@ class Game(Widget):
             else:
                 self.remove_widget(self.laser)
                 self.laserFired = False
+        if self.shots == 0:
+            self.game_over_label.text = "You are out of shots, game over. You score:  " + str(self.score) + "\n" + "Visit hall of fame to see the best result"
                 
     def on_touch_up(self, touch):
         if (touch.x < self.width / 3) and (touch.y < self.height / 3):
@@ -188,6 +262,3 @@ class Game(Widget):
             c = sqrt(((self.height / 3) - touch.y) ** 2 + (self.width / 3 - touch.x) ** 2) / sqrt(
                 ((self.height / 3) ** 2 + (self.width / 3) ** 2))
             self.serve_ball(ang=angle, coef=c)
-
-
-
