@@ -9,7 +9,7 @@ from kivy.properties import (
 from kivy.vector import Vector
 from kivy.clock import Clock
 from kivy.core.window import Window
-from kivy.graphics import Rectangle, Color
+from kivy.graphics import Rectangle, Color, Line
 from Obstacle import Obstacle
 from Laser import Laser
 from Bullet import Bullet
@@ -44,7 +44,7 @@ class Game(Widget):
     obstacle = ObjectProperty(None)
     obstacles = ListProperty([])
     chosen_weapon = "bullet"
-    laserFired = False
+    laser = Laser()
 
     def __init__(self, manager, **kwargs):
         super(Game, self).__init__(**kwargs)
@@ -164,8 +164,28 @@ class Game(Widget):
 
     def laserBlast(self):
         for obs in self.obstacles[:]:
-            if Obstacle.laserCollision(obs, self.laser):
+            if Obstacle.laserCollision(obs, self.laser.x, self.laser.y) and obs.type == "rock":
                 self.remove_obstacle(obs)
+            if Obstacle.laserCollision(obs, self.laser.x, self.laser.y) and obs.type == "perpetio":
+                print("perpetio collision")
+                self.stopLaser()
+    def deleteLaser(self):
+        if self.laser.fire_time > 6:
+            for segment in self.laser.laser_segments:
+                try:
+                    self.canvas.remove(segment)
+                except: ValueError
+            self.laser.reset_laser()
+
+    def stopLaser(self):
+        self.laser.reset_laser()
+        for segment in self.laser.laser_segments:
+            try:
+                self.canvas.remove(segment)
+            except:
+                ValueError
+
+
 
     def remove_obstacle(self, obstacle):
         self.remove_widget(obstacle)
@@ -175,13 +195,18 @@ class Game(Widget):
         print(self.score)
 
     def serve_ball(self, ang, coef):
+
         if self.chosen_weapon == "bullet" and self.shots > 0:
             self.shots -= 1
             self.ball_released = True
             self.ball.pos = SCREEN_WIDTH / 3, SCREEN_HEIGHT / 3
             self.ball.velocity = (Initial_velocity * cos(ang) * coef, Initial_velocity * sin(ang) * coef)
         if self.chosen_weapon == "laser":
-            self.fireLaser(ang)
+            if not self.laser.firingLaser:
+                self.laser.angleLaser = ang
+                self.fireLaser(ang)
+            else:
+                print("wait")
         if self.chosen_weapon == "bomb":
             self.shots -= 1
             self.bomb_launched = True
@@ -189,12 +214,9 @@ class Game(Widget):
             self.bomb.velocity = (Initial_velocity * cos(ang) * coef, Initial_velocity * sin(ang) * coef)
 
     def fireLaser(self, angle):
-        if self.laserFired == False:
-            self.laser = Laser(pos=(400,300))
-            self.laser.rotate(angle*180/pi - 90)
-            print(angle)
-            self.add_widget(self.laser)
-            self.laserFired = True
+        if self.laser.firingLaser == False:
+            self.laser.firingLaser = True
+            self.laser.isFired = True
         else:
             print("WAIT")
     def spawn_ball(self):
@@ -257,6 +279,14 @@ class Game(Widget):
         self.obstacles_added = True
 
     def update(self, dt):
+        if self.laser.firingLaser:
+            self.laser.draw_laser_segment(self.laser.angleLaser)
+            with self.canvas:
+                self.laser.segment = Line(points=[[self.laser.initial_point_x, self.laser.initial_point_y], [self.laser.x, self.laser.y]], width=5, cap="none")
+                self.laser.laser_segments.append(self.laser.segment)
+            self.deleteLaser()
+
+
         for obstacle in self.obstacles:
             if obstacle.obstacle_collision(self.ball) or obstacle.obstacle_collision(self.bomb)  and obstacle.type == "rock":
                 if self.chosen_weapon == "bullet":
@@ -272,10 +302,12 @@ class Game(Widget):
                 elif self.chosen_weapon == "bomb":
                     self.bomb.velocity[0] = -self.bomb.velocity[0]
                     self.bomb.velocity[1] = -self.bomb.velocity[1]
-            if self.laserFired:
-                if obstacle.laserCollision(self.laser):
+            if self.laser.isFired:
+                # if obstacle.laserCollision(self.laser):
+                #     self.laserBlast()
+                #     print("collision")
+                if obstacle.laserCollision(self.laser.x, self.laser.y):
                     self.laserBlast()
-                    print("collision")
         if self.ball_released:
             self.ball.move()
             if self.ball.pos[0] > CONST.SCREEN_WIDTH + 10:
@@ -284,12 +316,12 @@ class Game(Widget):
             self.bomb.move()
             if self.bomb.pos[0] > CONST.SCREEN_WIDTH + 10:
                 self.spawn_bomb()
-        if self.chosen_weapon == "laser" and self.laserFired:
-            if self.laser.size[0] > 0:
-                self.laser.size[0] -= 2
-            else:
-                self.remove_widget(self.laser)
-                self.laserFired = False
+        # if self.chosen_weapon == "laser" and self.laser.isFired:
+        #     if self.laser.size[0] > 0:
+        #         self.laser.size[0] -= 2
+        #     else:
+        #         self.remove_widget(self.laser)
+        #         self.laser.isFired = False
         if self.shots == 0:
             self.game_over_label.text = "You are out of shots, game over. You score:  " + str(self.score) + "\n" + "Visit hall of fame to see the best result"
                 
