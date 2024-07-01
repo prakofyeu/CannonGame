@@ -28,8 +28,8 @@ class Obstacle(Widget):
     #         return True
     def laserCollision(self, pointx, pointy):
         self.linearOffset = 5
-        self.diagonalOffset = 5
-        if self.collide_point(pointx, pointy) or self.collide_point(pointx + 5, pointy) or self.collide_point(pointx - 5, pointy) or self.collide_point(pointx, pointy - 5) or self.collide_point(pointx, pointy + 5):
+        self.diagonalOffset = 2
+        if self.collide_point(pointx, pointy) or self.collide_point(pointx + self.linearOffset, pointy) or self.collide_point(pointx - self.linearOffset, pointy) or self.collide_point(pointx, pointy - self.linearOffset) or self.collide_point(pointx, pointy + self.linearOffset):
             return True
         elif self.collide_point(pointx - self.diagonalOffset, pointy - self.diagonalOffset) or self.collide_point(pointx + self.diagonalOffset, pointy - self.diagonalOffset) or self.collide_point(pointx + self.diagonalOffset, pointy + self.diagonalOffset) or self.collide_point(pointx - self.diagonalOffset, pointy + self.diagonalOffset):
             return True
