@@ -8,6 +8,13 @@
             pos: self.pos
             size: self.size
 
+<Bomb>:
+    size: 20, 20
+    canvas:
+        Ellipse:
+            pos: self.pos
+            size: self.size
+
 
 <Obstacle>:
     #size: 100, 200
@@ -31,9 +38,13 @@
 
 <Game>:
     ball: pong_ball
+    bomb: bomb
 
     Bullet:
         id: pong_ball
+    
+    Bomb:
+        id: bomb
 
     Button:
         id: change_weapon_laser

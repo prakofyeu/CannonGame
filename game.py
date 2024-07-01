@@ -13,6 +13,7 @@ from kivy.graphics import Rectangle, Color
 from Obstacle import Obstacle
 from Laser import Laser
 from Bullet import Bullet
+from Bomb import Bomb
 import cannon_constants as CONST
 from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
 from kivy.uix.label import Label
@@ -36,7 +37,9 @@ class Game(Widget):
     score = 0
     shots = 0
     ball = ObjectProperty(None)
+    bomb = ObjectProperty(None)
     ball_released = False
+    bomb_launched = False
     obstacles_added = False
     obstacle = ObjectProperty(None)
     obstacles = ListProperty([])
@@ -98,6 +101,7 @@ class Game(Widget):
                     self.obstacles.remove(obstacle)
     
     def start_easy_btn_callback(self, *args, **kwargs):
+        self.set_best_score(self.score)
         self.clear_field()
         self.shots = 10
         self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 10, n_of_obstacles_y = 30, difficulty="easy")
@@ -106,6 +110,7 @@ class Game(Widget):
         self.game_over_label.text = ""
         
     def start_medium_btn_callback(self, *args, **kwargs):
+        self.set_best_score(self.score)
         self.clear_field()
         self.shots = 5
         self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 20, n_of_obstacles_y = 40, difficulty="medium")
@@ -114,6 +119,7 @@ class Game(Widget):
         self.game_over_label.text = ""
         
     def start_hard_btn_callback(self, *args, **kwargs):
+        self.set_best_score(self.score)
         self.clear_field()
         self.shots = 5
         self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 30, n_of_obstacles_y = 40, difficulty="hard")
@@ -146,6 +152,15 @@ class Game(Widget):
             distance = sqrt((pos[0] - obs.pos[0])**2 + (pos[1] - obs.pos[1])**2)
             if distance <= CONST.BULLET_RADIUS and obs.type == "rock":
                 self.remove_obstacle(obs)
+    
+    def bomb_blast(self, target_block):
+        self.bomb.velocity = (10, 0)
+        destroyed = 0
+        pos = target_block.pos
+        for obs in self.obstacles[:]:
+            distance = sqrt((pos[0] - obs.pos[0])**2 + (pos[1] - obs.pos[1])**2)
+            if distance <= CONST.BULLET_RADIUS and obs.type == "rock":
+                self.remove_obstacle(obs)
 
     def laserBlast(self):
         for obs in self.obstacles[:]:
@@ -167,6 +182,11 @@ class Game(Widget):
             self.ball.velocity = (Initial_velocity * cos(ang) * coef, Initial_velocity * sin(ang) * coef)
         if self.chosen_weapon == "laser":
             self.fireLaser(ang)
+        if self.chosen_weapon == "bomb":
+            self.shots -= 1
+            self.bomb_launched = True
+            self.bomb.pos = SCREEN_WIDTH / 3, SCREEN_HEIGHT / 3
+            self.bomb.velocity = (Initial_velocity * cos(ang) * coef, Initial_velocity * sin(ang) * coef)
 
     def fireLaser(self, angle):
         if self.laserFired == False:
@@ -181,6 +201,11 @@ class Game(Widget):
         self.ball.pos = CONST.SCREEN_WIDTH / 3, CONST.SCREEN_HEIGHT / 3
         self.ball.velocity = (0, 0)
         self.ball_released = False
+        
+    def spawn_bomb(self):
+        #self.bomb.pos = CONST.SCREEN_WIDTH / 3, CONST.SCREEN_HEIGHT / 3
+        self.bomb.velocity = (0, 0)
+        self.bomb_launched = False
 
     def addObstacles(self, pos, object_id, n_of_obstacles_x, n_of_obstacles_y, difficulty = "easy"):
         if difficulty == "easy":
@@ -233,12 +258,20 @@ class Game(Widget):
 
     def update(self, dt):
         for obstacle in self.obstacles:
-            if obstacle.obstacle_collision(self.ball) and obstacle.type == "rock":
-                self.bullet_blast(obstacle)
-                self.spawn_ball()
-            if obstacle.obstacle_collision(self.ball) and (obstacle.type == "perpetio" or obstacle.type == "mirror"):
-                self.ball.velocity[0] = -self.ball.velocity[0]
-                self.ball.velocity[1] = -self.ball.velocity[1]
+            if obstacle.obstacle_collision(self.ball) or obstacle.obstacle_collision(self.bomb)  and obstacle.type == "rock":
+                if self.chosen_weapon == "bullet":
+                    self.bullet_blast(obstacle)
+                    self.spawn_ball()
+                elif self.chosen_weapon == "bomb":
+                    self.bomb_blast(obstacle)
+                    self.spawn_bomb()
+            if obstacle.obstacle_collision(self.ball) or obstacle.obstacle_collision(self.bomb) and (obstacle.type == "perpetio" or obstacle.type == "mirror"):
+                if self.chosen_weapon == "bullet":
+                    self.ball.velocity[0] = -self.ball.velocity[0]
+                    self.ball.velocity[1] = -self.ball.velocity[1]
+                elif self.chosen_weapon == "bomb":
+                    self.bomb.velocity[0] = -self.bomb.velocity[0]
+                    self.bomb.velocity[1] = -self.bomb.velocity[1]
             if self.laserFired:
                 if obstacle.laserCollision(self.laser):
                     self.laserBlast()
@@ -247,6 +280,10 @@ class Game(Widget):
             self.ball.move()
             if self.ball.pos[0] > CONST.SCREEN_WIDTH + 10:
                 self.spawn_ball()
+        if self.bomb_launched:
+            self.bomb.move()
+            if self.bomb.pos[0] > CONST.SCREEN_WIDTH + 10:
+                self.spawn_bomb()
         if self.chosen_weapon == "laser" and self.laserFired:
             if self.laser.size[0] > 0:
                 self.laser.size[0] -= 2
