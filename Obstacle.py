@@ -23,9 +23,6 @@ class Obstacle(Widget):
     def obstacle_collision(self, ball):
         if self.collide_widget(ball):
             return True
-    # def laserCollision(self, laser):
-    #     if self.collide_widget(laser):
-    #         return True
     def laserCollision(self, pointx, pointy):
         self.linearOffset = 5
         self.diagonalOffset = 2

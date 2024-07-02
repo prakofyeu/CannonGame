@@ -1,39 +1,25 @@
-import math
 from math import sin, cos, atan, sqrt, pi
-from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.button import Button
 from kivy.properties import (
-    NumericProperty, ReferenceListProperty, ObjectProperty, ListProperty
+    ObjectProperty, ListProperty
 )
-from kivy.vector import Vector
-from kivy.clock import Clock
-from kivy.core.window import Window
 from kivy.graphics import Rectangle, Color, Line
 from Obstacle import Obstacle
 from Laser import Laser
 from Bullet import Bullet
 from Bomb import Bomb
 import cannon_constants as CONST
-from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
 from kivy.uix.label import Label
-from kivy.properties import StringProperty
 import random
-from cannon_constants import BOMB_MASS, BOMB_DRILL, BOMB_MAX_VEL
+from cannon_constants import BOMB_DRILL
 
 SCREEN_WIDTH: int = CONST.SCREEN_WIDTH
 SCREEN_HEIGHT: int = CONST.SCREEN_HEIGHT
 Initial_velocity = CONST.BULLET_MAX_VEL
 Frame_rate = 20.0
 
-class AimWidget(Widget):
-    def __init__(self, **kwargs):
-        super(AimWidget, self).__init__(**kwargs)
-        self.size = (CONST.SCREEN_WIDTH / 3, CONST.SCREEN_HEIGHT / 3)
-        self.pos_hint = {'x': 0, 'y': 0}
 
-    def on_touch_down(self, touch):
-        print(f"Touch on aim_widget")
 class Game(Widget):
     score = 0
     shots = 0
@@ -57,38 +43,49 @@ class Game(Widget):
             size_hint=(0.2, 0.1)
         )
         self.score_label = Label(
+            text = "Shots left: " + str(self.shots),
+            center_x = 100,
+            center_y = SCREEN_HEIGHT - 50,
+            font_size = "20dp"
+        )
+        self.shot_label = Label(
             text = "Current score: " + str(self.score),
             center_x = 100,
-            center_y = SCREEN_HEIGHT - 60
+            center_y = SCREEN_HEIGHT - 80,
+            font_size = "20dp"
         )
         self.game_over_label = Label(
             text = "",
             center_x = SCREEN_WIDTH/2 - 100,
-            center_y = SCREEN_HEIGHT/2
+            center_y = SCREEN_HEIGHT/2,
+            font_size = "15dp"
         )
         self.start_easy_btn = Button(
             text="Easy level",
             on_press=self.start_easy_btn_callback,
-            center_x = 100,
+            center_x = 70,
             center_y = SCREEN_HEIGHT - 200,
-            size_hint=(0.2, 0.1)
+            size=(150, 100)
         )
         self.start_medium_btn = Button(
             text="Medium level",
             on_press=self.start_medium_btn_callback,
-            center_x = 100,
-            center_y = SCREEN_HEIGHT - 300,
-            size_hint=(0.2, 0.1)
+            center_x = 70,
+            center_y = SCREEN_HEIGHT - 350,
+            size=(150, 100)
         )
         self.start_hard_btn = Button(
             text="Hard level",
             on_press=self.start_hard_btn_callback,
-            center_x = 100,
-            center_y = SCREEN_HEIGHT - 400,
-            size_hint=(0.2, 0.1)
+            center_x = 70,
+            center_y = SCREEN_HEIGHT - 500,
+            size=(150, 100)
         )
+        with self.canvas.before:
+            self.rect = Rectangle(pos=(self.x, self.y), size=(1000, 900), source='bg1.png')
         self.shots = 5
         self.add_widget(self.score_label)
+        self.add_widget(self.shot_label)
         self.add_widget(self.game_over_label)
         self.add_widget(self.back_btn)
         self.add_widget(self.start_easy_btn)
@@ -102,28 +99,37 @@ class Game(Widget):
                     self.obstacles.remove(obstacle)
     
     def start_easy_btn_callback(self, *args, **kwargs):
+        with self.canvas.before:
+            self.rect = Rectangle(pos=(self.x, self.y), size=(1000, 900), source='bg1.png')
         self.set_best_score(self.score)
         self.clear_field()
         self.shots = 10
-        self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 10, n_of_obstacles_y = 30, difficulty="easy")
+        self.shot_label.text = "Shots left: " + str(self.shots)
+        self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 13, n_of_obstacles_y = 25, difficulty="easy")
         self.score = 0
         self.score_label.text = "Current score: " + str(self.score)
         self.game_over_label.text = ""
         
     def start_medium_btn_callback(self, *args, **kwargs):
+        with self.canvas.before:
+            self.rect = Rectangle(pos=(self.x, self.y), size=(1000, 900), source='bg2.jpg')
         self.set_best_score(self.score)
         self.clear_field()
         self.shots = 5
-        self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 20, n_of_obstacles_y = 40, difficulty="medium")
+        self.shot_label.text = "Shots left: " + str(self.shots)
+        self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 13, n_of_obstacles_y = 25, difficulty="medium")
         self.score = 0
         self.score_label.text = "Current score: " + str(self.score)
         self.game_over_label.text = ""
         
     def start_hard_btn_callback(self, *args, **kwargs):
+        with self.canvas.before:
+            self.rect = Rectangle(pos=(self.x, self.y), size=(1000, 900), source='bg3.jpg')
         self.set_best_score(self.score)
         self.clear_field()
         self.shots = 5
-        self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 30, n_of_obstacles_y = 40, difficulty="hard")
+        self.shot_label.text = "Shots left: " + str(self.shots)
+        self.addObstacles(pos = (800, 500), object_id = 1, n_of_obstacles_x = 13, n_of_obstacles_y = 25, difficulty="hard")
         self.score = 0
         self.score_label.text = "Current score: " + str(self.score)
         self.game_over_label.text = ""
@@ -199,8 +205,6 @@ class Game(Widget):
             except:
                 ValueError
 
-
-
     def remove_obstacle(self, obstacle):
         self.remove_widget(obstacle)
         self.obstacles.remove(obstacle)
@@ -208,15 +212,16 @@ class Game(Widget):
         self.score_label.text = "Current score: " + str(self.score)
         print(self.score)
 
-    def serve_ball(self, ang, coef):
-
+    def serve_weapon(self, ang, coef):
         if self.chosen_weapon == "bullet" and self.shots > 0:
             self.shots -= 1
+            self.shot_label.text = "Shots left: " + str(self.shots)
             self.ball_released = True
             self.ball.pos = SCREEN_WIDTH / 3, SCREEN_HEIGHT / 3
             self.ball.velocity = (Initial_velocity * cos(ang) * coef, Initial_velocity * sin(ang) * coef)
         if self.chosen_weapon == "laser" and self.shots > 0:
             self.shots -= 1
+            self.shot_label.text = "Shots left: " + str(self.shots)
             if not self.laser.firingLaser:
                 self.laser.angleLaser = ang
                 self.fireLaser(ang)
@@ -224,6 +229,7 @@ class Game(Widget):
                 print("wait")
         if self.chosen_weapon == "bomb" and self.shots > 0:
             self.bomb.drill = 0
+            self.shot_label.text = "Shots left: " + str(self.shots)
             self.bomb.first_contact = False
             self.shots -= 1
             self.bomb_launched = True
@@ -254,49 +260,41 @@ class Game(Widget):
             t = 0
             for i in range(n_of_obstacles_x):
              for j in range(n_of_obstacles_y):
-                if j%3 == 0:
-                    t = random.randint(1,2)
-                    if t == 1:
+                    t = random.randint(1,20)
+                    if t in range(1,2):
                         obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="perpetio")
-                    else:
+                    elif t in range(2, 20):
                         obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="rock")
-                else:
-                    obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"))
-                self.add_widget(obstacle)
-                self.obstacles.append(obstacle)
+                    else:
+                        obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="mirror")
+                    self.add_widget(obstacle)
+                    self.obstacles.append(obstacle)
         elif difficulty == "medium":
             t = 0
             for i in range(n_of_obstacles_x):
              for j in range(n_of_obstacles_y):
-                if j%3 == 0:
-                    t = random.randint(1,3)
-                    if t == 1:
-                        obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="perpetio")
-                    elif t == 2:
-                        obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="mirror")
-                    else:
-                        obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="rock")
-                else:
-                    obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"))
-                self.add_widget(obstacle)
-                self.obstacles.append(obstacle)
+               t = random.randint(1,20)
+               if t in range(1,3):
+                    obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="perpetio")
+               elif t in range(3, 19):
+                    obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="rock")
+               else:
+                    obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="mirror")
+               self.add_widget(obstacle)
+               self.obstacles.append(obstacle)
         elif difficulty == "hard":
             t = 0
             for i in range(n_of_obstacles_x):
              for j in range(n_of_obstacles_y):
-                if j%1 == 0:
-                    t = random.randint(1,3)
-                    if t == 1:
-                        obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="perpetio")
-                    elif t == 2:
-                        obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="mirror")
-                    else:
-                        obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="rock")
-                else:
-                    obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"))
-                self.add_widget(obstacle)
-                self.obstacles.append(obstacle)
-        self.obstacles_added = True
+               t = random.randint(1,20)
+               if t in range(1,4):
+                    obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="perpetio")
+               elif t in range(4, 19):
+                    obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="rock")
+               else:
+                    obstacle = Obstacle(pos=(600 + 30 * i, 0 + 30 * j), object_id=int(f"{i}{j}"), type="mirror")
+               self.add_widget(obstacle)
+               self.obstacles.append(obstacle)
 
     def update(self, dt):
         if self.laser.firingLaser:
@@ -332,9 +330,6 @@ class Game(Widget):
                     self.bomb.velocity[0] = -0.9 * self.bomb.velocity[0]
                     self.bomb.velocity[1] = -0.9 * self.bomb.velocity[1]
             if self.laser.isFired:
-                # if obstacle.laserCollision(self.laser):
-                #     self.laserBlast()
-                #     print("collision")
                 if obstacle.laserCollision(self.laser.x, self.laser.y):
                     self.laserBlast()
         if self.ball_released:
@@ -345,12 +340,6 @@ class Game(Widget):
             self.bomb.move()
             if self.bomb.pos[0] > CONST.SCREEN_WIDTH + 10:
                 self.spawn_bomb()
-        # if self.chosen_weapon == "laser" and self.laser.isFired:
-        #     if self.laser.size[0] > 0:
-        #         self.laser.size[0] -= 2
-        #     else:
-        #         self.remove_widget(self.laser)
-        #         self.laser.isFired = False
         if self.shots == 0:
             self.game_over_label.text = "You are out of shots, game over. You score:  " + str(self.score) + "\n" + "Visit hall of fame to see the best result"
                 
@@ -359,4 +348,4 @@ class Game(Widget):
             angle = atan((self.height / 3 - touch.y) / (self.width / 3 - touch.x))
             c = sqrt(((self.height / 3) - touch.y) ** 2 + (self.width / 3 - touch.x) ** 2) / sqrt(
                 ((self.height / 3) ** 2 + (self.width / 3) ** 2))
-            self.serve_ball(ang=angle, coef=c)
+            self.serve_weapon(ang=angle, coef=c)
